@@ -27,7 +27,7 @@ This project highlights how manual cloud setup can be transformed into automated
 ## Deployment Steps
 1. Open AWS CloudFormation Console
 2. Click "Create Stack" → "With new resources"
-3. Upload `updated_aws.yaml`
+3. Upload `updated-aws-template.yaml`
 4. Enter stack name
 5. Select EC2 KeyPair
 6. Launch stack
