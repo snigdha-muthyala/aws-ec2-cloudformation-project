@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Upgraded EC2 Deployment with Web Server
+
+Parameters:
+  KeyName:
+    Description: Select an existing EC2 KeyPair
+    Type: AWS::EC2::KeyPair::KeyName
+
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+
+Resources:
+
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow SSH and HTTP access
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t3.micro
+      ImageId: !Ref LatestAmiId
+      KeyName: !Ref KeyName
+      SecurityGroupIds:
+        - !Ref MySecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum update -y
+          yum install -y httpd
+          systemctl start httpd
+          systemctl enable httpd
+          echo "<h1>Hello Snigdha 🚀 Your Web Server is Live!</h1>" > /var/www/html/index.html
+
+Outputs:
+
+  InstanceId:
+    Value: !Ref MyEC2Instance
+
+  PublicIP:
+    Value: !GetAtt MyEC2Instance.PublicIp
+
+  WebsiteURL:
+    Value: !Sub http://${MyEC2Instance.PublicDnsName}
